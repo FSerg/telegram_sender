@@ -1,0 +1,7 @@
+{
+  "name": "telegram_sender",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Sergey Filkin <fs@alternativa-pro.ru>",
+  "license": "MIT"
+}
