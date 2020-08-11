@@ -91,19 +91,30 @@ app.get("/call", (req, res) => {
     return res.status(400).send({ result: "Incorrect sec.token!" });
   }
 
-  const bot = new telegram(data.bot, {
+  // проверяем указан прокси или нет
+  let bot = new telegram(data.bot, {
     polling: false,
     request: {
-      agentClass: Agent,
-      agentOptions: {
-        socksHost: config.tgproxy_host,
-        socksPort: parseInt(config.tgproxy_port),
-        // If authorization is needed:
-        socksUsername: config.tgproxy_user,
-        socksPassword: config.tgproxy_password
-      }
+      agentClass: Agent
     }
   });
+
+  if (config.tgproxy_host) {
+    bot = new telegram(data.bot, {
+      polling: false,
+      request: {
+        agentClass: Agent,
+        agentOptions: {
+          socksHost: config.tgproxy_host,
+          socksPort: parseInt(config.tgproxy_port),
+          // If authorization is needed:
+          socksUsername: config.tgproxy_user,
+          socksPassword: config.tgproxy_password
+        }
+      }
+    });  
+  }
+
 
   const text = `Проп.звонок: ${data.phone} (${data.time} / ${data.duration}с.)`;
   bot
