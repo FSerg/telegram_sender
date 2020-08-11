@@ -8,6 +8,7 @@ import Agent from "socks5-https-client/lib/Agent";
 
 import config from "./config/config";
 import log from "./logger";
+import logger from "./logger";
 
 const app = express();
 
@@ -41,19 +42,24 @@ app.get("/sendtext", (req, res) => {
     return res.status(400).send({ result: "Incorrect sec.token!" });
   }
 
-  const bot = new telegram(data.bot, {
-    polling: false,
-    request: {
-      agentClass: Agent,
-      agentOptions: {
-        socksHost: config.tgproxy_host,
-        socksPort: parseInt(config.tgproxy_port),
-        // If authorization is needed:
-        socksUsername: config.tgproxy_user,
-        socksPassword: config.tgproxy_password
+  // проверяем указан прокси или нет
+  let bot = new telegram(data.bot, {polling: false});
+
+  if (config.tgproxy_host) {
+    bot = new telegram(data.bot, {
+      polling: false,
+      request: {
+        agentClass: Agent,
+        agentOptions: {
+          socksHost: config.tgproxy_host,
+          socksPort: parseInt(config.tgproxy_port),
+          // If authorization is needed:
+          socksUsername: config.tgproxy_user,
+          socksPassword: config.tgproxy_password
+        }
       }
-    }
-  });
+    });
+  }
 
   bot
     .sendMessage(data.chatId, data.text)
@@ -92,12 +98,7 @@ app.get("/call", (req, res) => {
   }
 
   // проверяем указан прокси или нет
-  let bot = new telegram(data.bot, {
-    polling: false,
-    request: {
-      agentClass: Agent
-    }
-  });
+  let bot = new telegram(data.bot, {polling: false});
 
   if (config.tgproxy_host) {
     bot = new telegram(data.bot, {
@@ -114,7 +115,6 @@ app.get("/call", (req, res) => {
       }
     });  
   }
-
 
   const text = `Проп.звонок: ${data.phone} (${data.time} / ${data.duration}с.)`;
   bot
